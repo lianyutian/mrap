@@ -1,0 +1,53 @@
+<realtime name="realtime_name" version="1.0.1" encoding="UTF-8">
+
+    <item_col_remark>
+
+    </item_col_remark>
+
+
+    <item_col_rename>
+
+    </item_col_rename>
+
+
+    <hbase_table_conf>
+
+        <field name="rowKey" value="id"/>
+
+        <field name="qualifier_name" value="id_tot"/>
+
+        <field name="region_qty" value="50"/>
+
+    </hbase_table_conf>
+
+
+    <redis_conf>
+
+        <field name="column" value="id_tot"/>
+
+        <field name="client_ip" value=""/>
+
+    </redis_conf>
+
+
+    <other_conf>
+
+        <field name="table_name" value="test_table"/>
+
+        <field name="model_name" value="pos"/>
+
+        <field name="item_qty" value="219"/>
+
+        <field name="write_method" value="all"/>
+
+        <field name="write_role" value="2"/>
+
+    </other_conf>
+
+<!--    <gbd_path>-->
+
+<!--        <field name="data_source" value="/apps-data/hduser1522/xs_ladm_safe/table/test_table/NumericedData"/>-->
+<!--        -->
+<!--    </gbd_path>-->
+
+</realtime>

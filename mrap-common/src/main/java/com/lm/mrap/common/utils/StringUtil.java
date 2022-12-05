@@ -16,6 +16,8 @@ public class StringUtil {
 
     public static final String EMPTY_STRING = "";
 
+    public static final String SLASH_STRING = "/";
+
     public static final String TABLE_SYMBOL = "\t";
 
     public static final String COMMA_SYMBOL = ",";

@@ -27,10 +27,16 @@ public class SeqUtil {
         return putListItem(linesBufferedReader);
     }
 
+    /**
+     * 读取 conf/tables 目录下配置的需要监控的表
+     *
+     * @return 表字符流
+     * @throws IOException IOException
+     */
     private static BufferedReader bufferedReader() throws IOException {
-        String tablePath = getConfigAbsolutePath(TALBE_CONF_PATH, SYSTEM_PROPERTY_TABLES);
+        String absolutePath = getConfigAbsolutePath(TALBE_CONF_PATH, SYSTEM_PROPERTY_TABLES);
 
-        InputStream inputStream = Files.newInputStream(new File(tablePath).toPath());
+        InputStream inputStream = Files.newInputStream(new File(absolutePath).toPath());
 
         return new BufferedReader(new InputStreamReader(inputStream));
     }
@@ -52,12 +58,24 @@ public class SeqUtil {
         List<String> lines = new ArrayList<>();
 
         int i = 0;
-        String line = null;
+        String line;
         while ((line = linesBufferedReader.readLine()) != null) {
             lines.add(i, line);
             i++;
         }
 
         return lines;
+    }
+
+    public static List<String> hdfsFileToList(String path, HdfsDealUtil hdfsDealUtil) {
+
+        try (BufferedReader bufferedReader = hdfsDealUtil.getBufferReader(path)) {
+
+            return putListItem(bufferedReader);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 }

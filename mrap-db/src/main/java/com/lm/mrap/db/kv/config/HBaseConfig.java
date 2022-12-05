@@ -10,7 +10,12 @@ import com.lm.mrap.common.config.CommonConfig;
  */
 public class HBaseConfig {
 
+    public static final String EXCHANGE_TABLE = CommonConfig.getStringConfigOrElse("hbase.exchange_table", "EXCHANGE_TABLE_INFO");
+
     public static final String[] EXCHANGE_TABLE_QUAILIFIERS = {"old_table", "active_table", "update_time"};
+
+
+    public static final String HIS_INFO_TABLE = CommonConfig.getStringConfigOrElse("hbase.his_table", "TABLE_HIS_INFO");
 
     public static final String[] HIS_INFO_TABLE_QUAILIFIERS = {"table_name", "write_time", "model_name"};
 

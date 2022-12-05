@@ -5,7 +5,6 @@ import com.lm.mrap.sync.thread.MonitorHdfsThread;
 import com.lm.mrap.sync.thread.SynchronizationHandler;
 import com.lm.mrap.sync.utils.SeqUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -41,7 +40,7 @@ public class DataSynchronization {
             synchronizationTasks.add(pool.submit(synchronizationHandler));
         }
 
-        // 监控线程
+        // 监控线程 默认监控hdfs上 /mrap-hdfs/devsup/table_is_readed/ 路径下是否有需要同步的表文件
         MonitorHdfsThread monitorHdfsThread = new MonitorHdfsThread(SeqUtil.fileToList());
         monitorHdfsThread.start();
 

@@ -52,8 +52,9 @@ public class KeyUtil {
         }
 
         if (arrLength == 1) {
-            return search1()
-        }
+            return search1(searchKey, arr);
+        } else
+            return searchN(searchKey, arr);
     }
 
     private static int search1(String key, String[] arr) {
@@ -114,13 +115,6 @@ public class KeyUtil {
 
         int compareResult = left.compareTo(right);
 
-        if (compareResult > 0) {
-            return 1;
-        }
-        if (compareResult == 0) {
-            return 0;
-        }
-
-        return -1;
+        return Integer.compare(compareResult, 0);
     }
 }

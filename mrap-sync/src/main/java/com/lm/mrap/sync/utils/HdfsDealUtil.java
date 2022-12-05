@@ -3,11 +3,21 @@ package com.lm.mrap.sync.utils;
 import com.lm.mrap.common.utils.StringUtil;
 import com.lm.mrap.logger.Logger;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.fs.permission.FsAction;
 import org.apache.hadoop.fs.permission.FsPermission;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +82,13 @@ public class HdfsDealUtil {
         return getFileInputStream(path(filePath));
     }
 
+    /**
+     * 判断文件是否存在
+     *
+     * @param filePath 文件路径
+     * @return true 存在
+     * @throws IOException IOException
+     */
     public boolean exists(String filePath) throws IOException {
         return hdfsFileSystem.exists(path(filePath));
     }
@@ -97,6 +114,13 @@ public class HdfsDealUtil {
         return new Path(filePath);
     }
 
+    /**
+     * 获取目录下的所有文件
+     *
+     * @param dirPath 目录路径
+     * @return 文件路径集合
+     * @throws IOException IOException
+     */
     public List<String> getPaths(String dirPath) throws IOException {
 
         List<String> pathList = new ArrayList<>();
@@ -122,8 +146,19 @@ public class HdfsDealUtil {
         return pathList;
     }
 
+    /**
+     * 不递归删除文件
+     *
+     * @param filePath 文件路径
+     * @return 删除是否成功
+     * @throws IOException IOException
+     */
     public boolean noRecursiveDeleteFile(String filePath) throws IOException {
         return hdfsFileSystem.delete(path(filePath), false);
+    }
+
+    public URI getUri() {
+        return hdfsFileSystem.getUri();
     }
 
     public void close() {

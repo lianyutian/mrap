@@ -1,6 +1,8 @@
 package com.lm.mrap.sync.config;
 
-import com.lm.mrap.common.config.CommonConfig;
+import io.netty.util.HashedWheelTimer;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liming
@@ -11,8 +13,14 @@ import com.lm.mrap.common.config.CommonConfig;
 public class SyncConsts {
     public static final String SYSTEM_PROPERTY_TABLES = "conf.file.synchronization.tables";
 
+    /**
+     * 表未同步标记
+     */
     public static final String SYNC_NO_FLAG = "N";
 
+    /**
+     * 表已同步标记
+     */
     public static final String SYNC_YES_FLAG = "Y";
 
     public static final String[] XML_CONF_KEY = {
@@ -32,6 +40,7 @@ public class SyncConsts {
 
     public static final String WRITE_METHOD_INIT_STR = "Init";
 
+    public static final HashedWheelTimer TIMER = new HashedWheelTimer(1, TimeUnit.SECONDS, 1000);
 
 
 }

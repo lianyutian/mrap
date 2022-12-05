@@ -15,6 +15,7 @@
         <module>mrap-common</module>
         <module>mrap-logger</module>
         <module>mrap-db</module>
+        <module>mrap-nodemanager</module>
     </modules>
 
 
@@ -28,6 +29,7 @@
         <junit.version>4.12</junit.version>
         <hadoop.version>3.1.3</hadoop.version>
         <hbase.version>2.5.1</hbase.version>
+        <zookeeper.version>3.8.0</zookeeper.version>
     </properties>
 
     <parent>

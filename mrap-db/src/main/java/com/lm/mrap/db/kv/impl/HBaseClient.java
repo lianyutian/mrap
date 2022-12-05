@@ -9,17 +9,34 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.mapreduce.LoadIncrementalHFiles;
-import org.apache.hadoop.hbase.tool.BulkLoadHFiles;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.BufferedMutatorParams;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.tool.BulkLoadHFilesTool;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
-import static com.lm.mrap.db.kv.config.HBaseConfig.*;
+import static com.lm.mrap.db.kv.config.HBaseConfig.BLOCK_CACHE_ENABLED;
+import static com.lm.mrap.db.kv.config.HBaseConfig.BLOOM_FILTER_TYPE;
+import static com.lm.mrap.db.kv.config.HBaseConfig.COLUMN_FAMILY;
+import static com.lm.mrap.db.kv.config.HBaseConfig.MAX_VERSIONS;
+import static com.lm.mrap.db.kv.config.HBaseConfig.THREAD_SLEEP;
 
 /**
  * @author liming
@@ -31,18 +48,26 @@ public class HBaseClient {
 
     private static final Connection CONNECTION = HBaseConnectionFactory.getConnection();
 
+    /**
+     * 控制 HBase DDL 相关操作
+     */
     private static Admin hbaseAdmin;
 
+    /**
+     * 控制 HBase DML 相关操作
+     */
     private final Table table;
 
     private final String tableName;
 
+    /**
+     * 封装 HBase 表
+     */
     private final TableName hTable;
 
     static {
 
         try {
-
             hbaseAdmin = CONNECTION.getAdmin();
         } catch (IOException e) {
 
@@ -79,6 +104,13 @@ public class HBaseClient {
         return false;
     }
 
+    /**
+     * 创建表
+     *
+     * @param regionArray
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void createHbaseTalbe(List<String> regionArray) throws IOException, InterruptedException {
 
         disableAndDeleteTalbe();
@@ -91,21 +123,33 @@ public class HBaseClient {
         hbaseAdmin.createTable(tableDescriptor, regions);
     }
 
-    private void disableAndDeleteTalbe() throws InterruptedException, IOException {
+    /**
+     * 删除表
+     *
+     * @throws IOException IOException
+     */
+    private void disableAndDeleteTalbe() throws IOException {
 
         if (hbaseAdmin.tableExists(hTable)) {
             if (hbaseAdmin.isTableEnabled(hTable)) {
                 hbaseAdmin.disableTable(hTable);
             }
 
-            SleepUitl.threadSleep("100-1000");
+            try {
+                SleepUitl.threadSleep("100-1000");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             hbaseAdmin.deleteTable(hTable);
         }
     }
 
     private TableDescriptorBuilder createAndAddHtableDescriptorColumnFamily() {
 
+        // 创建表描述建造者
         TableDescriptorBuilder tableDescriptorBuilder = TableDescriptorBuilder.newBuilder(hTable);
+        // 创建列描述建造者
         ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder = createAndSetColumnFamilyDescriptor();
         tableDescriptorBuilder.setColumnFamily(columnFamilyDescriptorBuilder.build());
 
@@ -114,6 +158,7 @@ public class HBaseClient {
 
     private ColumnFamilyDescriptorBuilder createAndSetColumnFamilyDescriptor() {
         ColumnFamilyDescriptorBuilder columnFamilyDescriptorBuilder = ColumnFamilyDescriptorBuilder.newBuilder(COLUMN_FAMILY.getBytes());
+        // 设置创建表时的参数
         columnFamilyDescriptorBuilder.setMaxVersions(MAX_VERSIONS);
         columnFamilyDescriptorBuilder.setBlockCacheEnabled(BLOCK_CACHE_ENABLED);
         columnFamilyDescriptorBuilder.setValue("BLOOPMFILTER", BLOOM_FILTER_TYPE);
@@ -124,23 +169,14 @@ public class HBaseClient {
     private byte[][] getRegions(List<String> regionArray) {
 
         byte[][] regions = new byte[regionArray.size()][];
-        Iterator<byte[]> regionRowIterator = getRegionRowIterator(regionArray);
-
-        return addRegionsItem(regions, regionRowIterator);
-
-    }
-
-    private Iterator<byte[]> getRegionRowIterator(List<String> regionArray) {
 
         TreeSet<byte[]> rows = new TreeSet<>(Bytes.BYTES_COMPARATOR);
-
-        for (int index = 0; index < regionArray.size(); index++) {
-
-            rows.add(Bytes.toBytes(regionArray.get(index)));
-
+        for (String region : regionArray) {
+            rows.add(Bytes.toBytes(region));
         }
 
-        return rows.iterator();
+        return addRegionsItem(regions, rows.iterator());
+
     }
 
     private byte[][] addRegionsItem(byte[][] regions, Iterator<byte[]> regionRowIterator) {
@@ -194,6 +230,22 @@ public class HBaseClient {
     public HashMap<HashMap<String, String>, String> get(String key) throws IOException {
 
         Get getter = getter(KeyUtil.getPrimaryKey(key));
+
+        return getMap(getter);
+    }
+
+    /**
+     * 获取 rowkey 对应的所有版本数据
+     *
+     * @param rowKey rowkey
+     * @return rowkey 对应的所有版本数据
+     * @throws IOException IOException
+     */
+    public HashMap<HashMap<String, String>, String> getAllVersionsInfo(String rowKey) throws IOException {
+
+        Get getter = getter(KeyUtil.getPrimaryKey(rowKey));
+
+        getter.readAllVersions();
 
         return getMap(getter);
     }
@@ -394,6 +446,26 @@ public class HBaseClient {
         return put;
     }
 
+
+    public void putDataByBatch(List<Put> puts) throws IOException {
+
+        table.put(puts);
+        puts.clear();
+
+        try {
+            SleepUitl.threadSleep(THREAD_SLEEP);
+        } catch (InterruptedException e) {
+
+            Logger.error(
+                    "HBaseClient.putDataByBatch",
+                    "InterruptedException",
+                    "timeStr: " + THREAD_SLEEP,
+                    e.getMessage()
+            );
+            e.printStackTrace();
+        }
+    }
+
     public void putDataByBatch(List<Put> puts, BufferedMutator bufferedMutator) throws IOException {
 
         bufferedMutator.mutate(puts);
@@ -426,7 +498,6 @@ public class HBaseClient {
         Configuration configuration = hbaseAdmin.getConfiguration();
         configuration.set("hadoop.tmp.dir", "/data/tmp/hadoop-" + System.getProperty("user.name"));
         configuration.setInt("hbase.mapreduce.bulkload.max.hfiles.perRegion.perFamily", 500000);
-
 
         BulkLoadHFilesTool bulkLoadHFilesTool = new BulkLoadHFilesTool(configuration);
         bulkLoadHFilesTool.bulkLoad(hTable, new Path(uri + "/" + hFilePath));

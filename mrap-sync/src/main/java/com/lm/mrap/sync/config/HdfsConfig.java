@@ -13,7 +13,7 @@ public class HdfsConfig {
 
     private static final String HBASE_ROOT_PATH = INGESTION_CONFIG_ROOT_PATH + ".hdfs.hbase";
 
-    public static final String BASE_PATH = CommonConfig.getStringConfigOrElse(HBASE_ROOT_PATH + ".base_path", "/lbdpada-hdfs/devsup");
+    public static final String BASE_PATH = CommonConfig.getStringConfigOrElse(HBASE_ROOT_PATH + ".base_path", "/mrap-hdfs/devsup");
 
     public static final String TABLE_DATA_PATH = BASE_PATH + "/table/";
 

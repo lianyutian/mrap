@@ -9,6 +9,7 @@
         <module name="mrap-sync" />
         <module name="mrap-common" />
         <module name="mrap-db" />
+        <module name="mrap-nodemanager" />
         <module name="mrap-logger" />
       </profile>
     </annotationProcessing>
@@ -18,6 +19,7 @@
       <module name="mrap-common" options="-parameters" />
       <module name="mrap-db" options="-parameters" />
       <module name="mrap-logger" options="-parameters" />
+      <module name="mrap-nodemanager" options="-parameters" />
       <module name="mrap-sync" options="-parameters" />
     </option>
   </component>

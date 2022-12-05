@@ -7,7 +7,6 @@ import com.lm.mrap.sync.factory.HadoopConfigFactory;
 import com.lm.mrap.sync.utils.HdfsDealUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,18 +20,22 @@ import static com.lm.mrap.sync.config.SyncConsts.SYNC_NO_FLAG;
 /**
  * @author liming
  * @version 1.0
- * @description: 监控 HDFS 变化线程
+ * @description: 监控 HDFS 上表文件变化线程
+ * 当该目录下 (默认目录）/mrap-hdfs/devsup/table_is_readed/ 有表文件时触发同步操作
  * @date 2022/10/27 下午3:05
  */
 @Slf4j
 public class MonitorHdfsThread extends Thread {
     private static final int TABLE_INDEX = 0;
 
+    /**
+     * Y/N 标记表是否同步过
+     */
     private static final int READER_FLAG_INDEX = 1;
 
-    private static volatile boolean IS_CONTINUE = true;
+    private static final boolean IS_CONTINUE = true;
 
-    private static Configuration configuration = HadoopConfigFactory.configuration;
+    private static final Configuration CONFIGURATION = HadoopConfigFactory.configuration;
 
     private static HdfsDealUtil hdfsDealUtil;
 
@@ -40,7 +43,7 @@ public class MonitorHdfsThread extends Thread {
 
     static {
         try {
-            hdfsDealUtil = new HdfsDealUtil(configuration);
+            hdfsDealUtil = new HdfsDealUtil(CONFIGURATION);
         } catch (IOException e) {
             Logger.error("MonitorHdfsThread IOException", e.getMessage());
         }
@@ -60,7 +63,7 @@ public class MonitorHdfsThread extends Thread {
             isReadFileOfTables(monitorTables);
 
             try {
-
+                // 默认睡眠10分钟
                 SleepUitl.minute(MONITOR_INTERVAL);
 
             } catch (InterruptedException e) {
@@ -76,24 +79,25 @@ public class MonitorHdfsThread extends Thread {
     }
 
     /**
-     * 判断 hdfs 路径上表数据是否准备好且有权限访问
+     * 判断 hdfs 路径上表文件是否准备好且有权限访问
      *
-     * @param tables
+     * @param tables 需要同步表集合
      */
     private static void isReadFileOfTables(List<String> tables) {
 
         try {
 
             for (String table : tables) {
-
+                // eg: /mrap-hdfs/devsup/table_is_readed/test_table
                 String tablePath = TABLE_IS_READED + table;
 
-                BufferedReader fileBuffer = null;
+                BufferedReader fileBuffer;
 
                 if (hdfsDealUtil.exists(tablePath) && hdfsDealUtil.isHasOtherAllPersion(tablePath)) {
 
+                    // 获取 hdfs 文件数据流
                     fileBuffer = hdfsDealUtil.getBufferReader(tablePath);
-                    String line = null;
+                    String line;
 
                     while ((line = fileBuffer.readLine()) != null) {
                         splitLineAndPutQueue(line);
@@ -118,6 +122,11 @@ public class MonitorHdfsThread extends Thread {
 
     }
 
+    /**
+     * 解析文件判断表是否需要同步
+     *
+     * @param line 文件格式：test_table  Y
+     */
     private static void splitLineAndPutQueue(String line) {
 
         List<String> tableNameAndReadFlag = StringUtil.strSplit(line, StringUtil.TABLE_SYMBOL);
@@ -142,6 +151,12 @@ public class MonitorHdfsThread extends Thread {
         }
     }
 
+    /**
+     * 删除 hdfs 上标记表同步文件
+     *
+     * @param path 文件路径
+     * @return 是否删除成功
+     */
     public static boolean deleteTableIsReadFile(String path) {
 
         try {
@@ -151,6 +166,7 @@ public class MonitorHdfsThread extends Thread {
                 return hdfsDealUtil.noRecursiveDeleteFile(path);
 
             } else {
+
                 Logger.info(
                         "MonitorHdfsThread.deleteTableIsReadFile",
                         path,

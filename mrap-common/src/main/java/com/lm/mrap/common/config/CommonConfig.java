@@ -105,8 +105,6 @@ public class CommonConfig {
         return defaultValue;
     }
 
-
-
     /**
      * 获取 int 类型配置数据
      *
