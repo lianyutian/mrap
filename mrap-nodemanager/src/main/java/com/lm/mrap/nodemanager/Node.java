@@ -14,7 +14,7 @@ public interface Node {
 
     String path();
 
-    String parent();
+    Node parent();
 
     List<Node> children();
 
@@ -26,6 +26,5 @@ public interface Node {
 
     String readAsString();
 
-    <H, E extends  NodeWatchEwatch(E event, H hadndler, AtomicBoolean watchAgain);
-
+    <H, E extends  NodeWatchEvent<H>> void watch(E event, H hadndler, AtomicBoolean watchAgain);
 }

@@ -8,5 +8,14 @@ package com.lm.mrap.nodemanager;
  */
 public abstract class NodeWatchEvent<H> {
 
-    public static NodeWatchEvent()
+    public static NodeWatchEvent<ChildNodeCreationUpdateHandler> WHEN_CHILD_CHANGED = new NodeWatchEvent<ChildNodeCreationUpdateHandler>(){};
+
+    public static NodeWatchEvent<NodeCreationUpdateHandler> WHEN_NODE_CREATION = new NodeWatchEvent<NodeCreationUpdateHandler>() {
+    };
+
+    public static NodeWatchEvent<NodeCreationUpdateHandler> WHEN_NODE_UPDATED = new NodeWatchEvent<NodeCreationUpdateHandler>() {
+    };
+
+    public static NodeWatchEvent<NodeDeletedHandler> WHEN_NODE_DELETED = new NodeWatchEvent<NodeDeletedHandler>() {
+    };
 }

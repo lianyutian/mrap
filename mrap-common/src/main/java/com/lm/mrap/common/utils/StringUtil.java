@@ -1,6 +1,5 @@
 package com.lm.mrap.common.utils;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -57,4 +56,34 @@ public class StringUtil {
 
         return stringWriter.toString();
     }
+
+    public static String combinePath(String parentPath, String childPath) {
+
+        String newPath = parentPath;
+
+        if (childPath.startsWith("/")) {
+            newPath += childPath;
+        } else {
+            newPath += "/" + childPath;
+        }
+
+        return newPath;
+    }
+
+    public static String combineString(String str, String ...strs) {
+
+        if (strs.length == 0) {
+            return str;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(str);
+
+        for (String s : strs) {
+            builder.append(s);
+        }
+
+        return builder.toString();
+    }
+
 }
