@@ -299,7 +299,7 @@ public class HbaseWriteHandlerForInitOrAllData {
     }
 
     /**
-     * 获取列字段及对应值
+     * 获取 EXCHANGE_TABLE_INFO 表中对应taleName的当前表和上一个版本表数据
      *
      * @param tableName 表名
      * @return 字段map
@@ -321,6 +321,13 @@ public class HbaseWriteHandlerForInitOrAllData {
         return hashMap;
     }
 
+    /**
+     * 获取 HIS_INFO_TABLE 表中对应 tableName 所有历史版本
+     * @param hisTableClient
+     * @param tableName
+     * @return
+     * @throws IOException
+     */
     private static HashMap<HashMap<String, String>, String> getHistoryTableInfo(HBaseClient hisTableClient, String tableName) throws IOException {
 
         return hisTableClient.getAllVersionsInfo(tableName);
@@ -340,7 +347,9 @@ public class HbaseWriteHandlerForInitOrAllData {
             });
         });
 
+        // 保留表上一个版本
         removeInfo(hashMap, hisHashSet, OLD_TABLE);
+        // 保留表当前版本
         removeInfo(hashMap, hisHashSet, ACTIVE_TABLE);
 
         return new ArrayList<>(hisHashSet);

@@ -3,7 +3,7 @@ package com.lm.mrap.nodemanager;
 /**
  * @author liming
  * @version 1.0
- * @description: TODO
+ * @description: 节点监控事件
  * @date 2022/11/14 下午2:47
  */
 public abstract class NodeWatchEvent<H> {
