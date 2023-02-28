@@ -10,5 +10,5 @@ import com.lm.mrap.common.config.CommonConfig;
  */
 public class ZookeeperConfig {
 
-    public static final String ZK_PARENT_NODE_PATH = CommonConfig.getStringConfigOrElse("sync.zookeeper.parent_noe_path", "/Ada/table");
+    public static final String ZK_PARENT_NODE_PATH = CommonConfig.getStringConfigOrElse("sync.zookeeper.parent_noe_path", "/sync/table");
 }

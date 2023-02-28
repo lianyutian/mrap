@@ -112,7 +112,7 @@ public class CommonConfig {
      * @param defaultValue 配置默认值
      * @return 配置值
      */
-    public static int getIntegerConfigOrElse(String path, int defaultValue) {
+    public static Integer getIntegerConfigOrElse(String path, int defaultValue) {
         return getConfigValue(path, defaultValue, CONFIG::getInt);
     }
 

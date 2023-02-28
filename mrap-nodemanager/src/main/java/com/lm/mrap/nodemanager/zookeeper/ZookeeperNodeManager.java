@@ -2,13 +2,16 @@ package com.lm.mrap.nodemanager.zookeeper;
 
 import com.lm.mrap.common.config.CommonConfig;
 import com.lm.mrap.common.utils.StringUtil;
-import com.lm.mrap.nodemanager.*;
+import com.lm.mrap.nodemanager.Node;
+import com.lm.mrap.nodemanager.NodeExceptions;
+import com.lm.mrap.nodemanager.NodeLifecycleType;
+import com.lm.mrap.nodemanager.NodeManager;
+import com.lm.mrap.nodemanager.NodeWatchEvent;
 import io.netty.util.internal.EmptyArrays;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 
-import javax.sound.midi.Track;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -37,14 +40,11 @@ public class ZookeeperNodeManager implements NodeManager {
 
         long end = System.currentTimeMillis() + connectionTimeout;
 
-        if (zkClient == null) {
-
-            zkClient = new ZooKeeper(hosts, sessionTimeout, null);
-        } else {
+        if (zkClient != null) {
 
             zkClient.close();
-            zkClient = new ZooKeeper(hosts, sessionTimeout, null);
         }
+        zkClient = new ZooKeeper(hosts, sessionTimeout, null);
 
         while (zkClient.getState() != ZooKeeper.States.CONNECTED) {
 
@@ -96,9 +96,10 @@ public class ZookeeperNodeManager implements NodeManager {
         try {
 
             zkClient.create(path, data, ZkExchange.DEFAULT_ACL, createMode);
-        } catch (InterruptedException | KeeperException e) {
-
-
+        } catch  (KeeperException.NodeExistsException e) {
+            throw new NodeExceptions.NodeExistsException(e);
+        } catch (Exception e) {
+            throw new NodeExceptions.NodeCreationException(e);
         }
 
         return openNode(path);

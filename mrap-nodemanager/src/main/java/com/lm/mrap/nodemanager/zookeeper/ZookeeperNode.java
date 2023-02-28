@@ -1,11 +1,14 @@
 package com.lm.mrap.nodemanager.zookeeper;
 
 import com.lm.mrap.common.config.CommonConfig;
+import com.lm.mrap.common.exceptions.CommonException;
+import com.lm.mrap.common.exceptions.ExceptionConditions;
 import com.lm.mrap.common.utils.StringUtil;
 import com.lm.mrap.logger.Logger;
 import com.lm.mrap.nodemanager.*;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
+import org.jooq.lambda.tuple.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +31,33 @@ public class ZookeeperNode implements Node {
 
     public ZookeeperNode(String path, ZooKeeper zkClient, ZookeeperNodeManager zkNodeManager) {
 
+        // 传入的构造方法的参数都不能为null
+        CommonException.throwNotAllowIfNull(
+                "节点路径是null，或者zkClient是null，或者zkNodeManager是null",
+                CommonException.Logic.OR,
+                path,
+                zkClient,
+                zkNodeManager
+        );
+
+        // path参数不能是空串，并且也必须是一个路径（包含/）
+        CommonException.throwNotAllow(
+                "节点路径是空的字符串或不是路径",
+                ExceptionConditions.combineCondition(
+                        ExceptionConditions.STRING_IS_EMPTY,
+                        ExceptionConditions.STRING_NOT_PATH,
+                        CommonException.Logic.OR),
+                new Tuple2<>(path, path));
+
         this.zkNodeManager = zkNodeManager;
 
+        // 如果path是 / 路径则直接使用，如果path最后一个字符是 / 则将它去掉
         this.path = path.endsWith(StringUtil.SLASH_STRING) && path.length() != 1
                 ? path.substring(0, path.length() - 1) : path;
 
         this.zkClient = zkClient;
 
+        // 计算父节点路径，如果节点是根路径，则没有父节点，如果不是根路径，则从源路径中截取它的父路径
         if (path.equals("/")) {
             this.parentPath = null;
             this.name = "/";
@@ -133,7 +156,7 @@ public class ZookeeperNode implements Node {
     }
 
     @Override
-    public <H, E extends NodeWatchEvent<H>> void watch(E event, H hadndler, AtomicBoolean watchAgain) {
+    public <H, E extends NodeWatchEvent<H>> void watch(E event, H handler, AtomicBoolean watchAgain) {
 
         try {
 
@@ -143,15 +166,15 @@ public class ZookeeperNode implements Node {
                     throw new NodeExceptions.NodeWatchException("路径：" + path + "是不存在的");
                 }
 
-                zkClient.getChildren(path, wathchedEvent -> {
+                zkClient.getChildren(path, watchedEvent -> {
 
-                    Watcher.Event.EventType eventType = wathchedEvent.getType();
+                    Watcher.Event.EventType eventType = watchedEvent.getType();
 
                     if (eventType == Watcher.Event.EventType.NodeDeleted
                             || eventType == Watcher.Event.EventType.NodeChildrenChanged) {
 
                         if (watchAgain.get()) {
-                            watch(event, hadndler, watchAgain);
+                            watch(event, handler, watchAgain);
                         }
 
                         Logger.info(
@@ -162,7 +185,7 @@ public class ZookeeperNode implements Node {
                         );
 
                         List<Node> childNodes = children();
-                        ((ChildNodeCreationUpdateHandler) hadndler).process(childNodes);
+                        ((ChildNodeCreationUpdateHandler) handler).process(childNodes);
                     }
                 });
 
@@ -177,7 +200,7 @@ public class ZookeeperNode implements Node {
                     if (eventType == Watcher.Event.EventType.NodeCreated) {
 
                         if (watchAgain.get()) {
-                            watch(event, hadndler, watchAgain);
+                            watch(event, handler, watchAgain);
                         }
 
                         Logger.info(
@@ -188,13 +211,13 @@ public class ZookeeperNode implements Node {
                                 )
                         );
 
-                        ((NodeCreationUpdateHandler) hadndler).process(ZookeeperNode.this);
+                        ((NodeCreationUpdateHandler) handler).process(ZookeeperNode.this);
                     }
 
                     if (eventType == Watcher.Event.EventType.NodeDeleted) {
 
                         if (watchAgain.get()) {
-                            watch(event, hadndler, watchAgain);
+                            watch(event, handler, watchAgain);
                         }
 
                         Logger.info(
@@ -205,7 +228,7 @@ public class ZookeeperNode implements Node {
                                 )
                         );
 
-                        ((NodeDeletedHandler) hadndler).process(ZookeeperNode.this.path());
+                        ((NodeDeletedHandler) handler).process(ZookeeperNode.this.path());
                     }
                 });
             }
@@ -221,7 +244,7 @@ public class ZookeeperNode implements Node {
                             if (watchedEvent.getType() == Watcher.Event.EventType.NodeDataChanged) {
 
                                 if (watchAgain.get()) {
-                                    watch(event, hadndler, watchAgain);
+                                    watch(event, handler, watchAgain);
                                 }
 
                                 Logger.info(
@@ -232,7 +255,7 @@ public class ZookeeperNode implements Node {
                                         )
                                 );
 
-                                ((NodeCreationUpdateHandler) hadndler).process(ZookeeperNode.this);
+                                ((NodeCreationUpdateHandler) handler).process(ZookeeperNode.this);
                             }
                         },
                         zkClient.exists(path, false));
