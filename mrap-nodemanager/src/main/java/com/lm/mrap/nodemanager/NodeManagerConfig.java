@@ -13,9 +13,9 @@ public class NodeManagerConfig {
 
     public static final String NODE_MANAGER_HOSTS = CommonConfig.getStringConfigOrElse("nodemanager.hosts", "localhost:2181");
 
-    public static final int NODE_MANAGER_SESSION_TIMEOUT = CommonConfig.getIntegerConfigOrElse("nodemanager.sessionTimeout", 1000);
+    public static final int NODE_MANAGER_SESSION_TIMEOUT = CommonConfig.getIntegerConfigOrElse("nodemanager.sessionTimeout", 6000);
 
-    public static final int NODE_MANAGER_CONNECT_TIMEOUT = CommonConfig.getIntegerConfigOrElse("nodemanager.connecTimeout", 2000);
+    public static final int NODE_MANAGER_CONNECT_TIMEOUT = CommonConfig.getIntegerConfigOrElse("nodemanager.connecTimeout", 6000);
 
     public static final String NODE_ROOT_PATH = CommonConfig.getStringConfigOrElse("nodemanager.rootPath", "/mrap");
 

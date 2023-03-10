@@ -1,7 +1,6 @@
 package com.lm.mrap.logger;
 
 import com.lm.mrap.common.utils.SleepUitl;
-import lombok.extern.java.Log;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -1,6 +1,5 @@
 package com.lm.mrap.common.utils;
 
-import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,7 +11,6 @@ import java.util.Date;
  * @description: 日期工具类
  * @date 2022/10/20 下午2:02
  */
-@Slf4j
 public class DateUtil {
     public static String getCurrentDay(String format) {
         return getDay(format, new Date());
@@ -29,7 +27,7 @@ public class DateUtil {
         try {
             return simpleDateFormat.parse(getCurrentDay("yyyyMMdd")).getTime() / 1000;
         } catch (ParseException e) {
-            log.error(e.getMessage(), e);
+            //Logger.error(e.getMessage(), e);
         }
 
         return 0L;

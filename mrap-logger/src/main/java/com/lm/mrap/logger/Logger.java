@@ -15,7 +15,7 @@ import static com.lm.mrap.logger.config.LoggerConfig.*;
 /**
  * @author liming
  * @version 1.0
- * @description: 日志昔日如入口，所有需要写入日志的系统都可以通过这个类来写入日志
+ * @description: 日志写入入口，所有需要写入日志的系统都可以通过这个类来写入日志
  * @date 2022/10/27 下午3:14
  */
 public class Logger {

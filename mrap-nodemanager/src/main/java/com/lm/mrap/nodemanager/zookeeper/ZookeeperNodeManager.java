@@ -56,6 +56,7 @@ public class ZookeeperNodeManager implements NodeManager {
         }
 
         if (zkClient.getState() != ZooKeeper.States.CONNECTED) {
+
             throw new IOException("zk host : " + hosts + "不能连接");
         }
 

@@ -1,9 +1,10 @@
 package com.lm.mrap.common.config;
 
 
+import com.lm.mrap.common.logger.InternalLogger;
+import com.lm.mrap.common.logger.InternalLoggerFactory;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -19,7 +20,6 @@ import java.util.function.Function;
  * @description: 公共配置读取类
  * @date 2022/10/11 下午5:38
  */
-@Slf4j
 public class CommonConfig {
     /**
      * 配置文件路径
@@ -55,6 +55,10 @@ public class CommonConfig {
 
     public static Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+    private static final InternalLogger logger = getLogger(CommonConfig.class);
+
+
+
     /**
      * 初始化配置
      */
@@ -87,6 +91,28 @@ public class CommonConfig {
                 System.exit(-1);
             }
         }
+    }
+
+    /**
+     * 获取一个日志记录器
+     *
+     * @param name 记录器名称
+     * @return
+     */
+    public static InternalLogger getLogger(String name) {
+
+        return InternalLoggerFactory.getInstance(name);
+    }
+
+    /**
+     * 获取一个日志记录器
+     *
+     * @param classz 记录日志的类信息
+     * @return
+     */
+    public static InternalLogger getLogger(Class<?> classz) {
+
+        return InternalLoggerFactory.getInstance(classz);
     }
 
     /**
@@ -172,9 +198,9 @@ public class CommonConfig {
 
         if (value == defaultValue) {
             if (value != null) {
-                log.error("配置：{} 不存在或者没有配置 {} 将使用默认配置：{}", path, errorMsg, defaultValue);
+                logger.error("配置：{} 不存在或者没有配置 {} 将使用默认配置：{}", path, errorMsg, defaultValue);
             } else {
-                log.error("配置：{} 不存在或者没有配置 error：{}", path, errorMsg);
+                logger.error("配置：{} 不存在或者没有配置 error：{}", path, errorMsg);
             }
         }
 

@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author liming
@@ -84,6 +85,11 @@ public class StringUtil {
         }
 
         return builder.toString();
+    }
+
+    public static Supplier<String> lazyCombineString(String str, String ... strs) {
+
+        return () -> combineString(str, strs);
     }
 
 }

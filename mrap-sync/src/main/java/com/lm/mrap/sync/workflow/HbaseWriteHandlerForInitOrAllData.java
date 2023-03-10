@@ -6,6 +6,7 @@ import com.lm.mrap.db.kv.config.HBaseConfTable;
 import com.lm.mrap.db.kv.config.HBaseConfTableType;
 import com.lm.mrap.db.kv.config.HBaseConfig;
 import com.lm.mrap.db.kv.impl.HBaseClient;
+import com.lm.mrap.db.monitor.zk.ZkNodeUtil;
 import com.lm.mrap.logger.Logger;
 import com.lm.mrap.sync.utils.HdfsDealUtil;
 import com.lm.mrap.sync.utils.MapUtil;
@@ -380,10 +381,10 @@ public class HbaseWriteHandlerForInitOrAllData {
     private static boolean writeNodeData(String tableName, String currentTable, String writeMethod, String clientIps) {
 
         boolean isWriteDone = false;
-
         String tableNodePath = ZK_PARENT_NODE_PATH + StringUtil.SLASH_STRING + tableName;
-
         String registerInfo;
+
+        //ZKNode
 
         return result;
 
