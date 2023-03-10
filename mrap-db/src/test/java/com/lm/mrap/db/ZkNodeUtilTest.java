@@ -15,7 +15,7 @@ public class ZkNodeUtilTest {
 
     @Test
     public void testWriteNodeData() {
-        String path = "";
+        String path = "/sync/table/test_table";
         ZkNodeUtil.writeNodeData(path, "/sync/table/test_table");
     }
 

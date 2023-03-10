@@ -28,12 +28,12 @@ public class ZkNodeUtil {
 
         createZKPathIfNotExists(path);
 
-//        Node node = getNode(path);
-//
-//        // 判断数据内容不重复
-//        if (!node.readAsString().equals(data)) {
-//            node.write(data);
-//        }
+        Node node = getNode(path);
+
+        // 判断数据内容不重复
+        if (!node.readAsString().equals(data)) {
+            node.write(data);
+        }
 
         return true;
     }
